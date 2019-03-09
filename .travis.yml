@@ -1,0 +1,17 @@
+sudo: required
+services:
+  - docker
+before_install:
+  - docker build -t kunwarluthera/multi-docker -f ./client/Dockerfile.dev ./client
+script:
+  - docker run kunwarluthera/multi-docker npm test -- --coverage 
+after_success:
+  - docker build -t kunwarluthera/multi-client ./client
+  - docker build -t kunwarluthera/multi-nginx ./nginx
+  - docker build -t kunwarluthera/multi-server ./server
+  - docker build -t kunwarluthera/multi-worker ./worker
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  - docker push kunwarluthera/multi-client
+  - docker push kunwarluthera/multi-nginx
+  - docker push kunwarluthera/multi-server
+  - docker push kunwarluthera/multi-worker
